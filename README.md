@@ -1,2 +1,2 @@
 # twgtd
-GTD automation script for Taskwarrior
+GTD automation script for Taskwarrior (definitely a work in progress...)
