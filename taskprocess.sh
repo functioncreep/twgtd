@@ -9,14 +9,34 @@ IFS=" " read -r -a INBOX <<< "$INBOX_UUIDS"
 # get array length
 INBOX_LENGTH=${#INBOX[*]}
 
-for (( i=0; i<$INBOX_LENGTH; i++ )); do
-  # get task description
-  TASK_DESCRIPTION=$( task _get  ${INBOX[$i]}.description 
-  echo "Task $(($i+1)) Description: $TASK_DESCRIPTION"
+ATTEMPTS=0
+while [[ $ATTEMPTS -lt 10 ]]; do
+  echo "You have $INBOX_LENGTH tasks in your inbox to process."
+  read -p "Should I go ahead? (Y/N): " response
+  echo;
 
-  if (( $i < $INBOX_LENGTH-1 )); then
-    read -n 1 -s -r -p "Press any key for the next task..." key
+  if [[ $response == "y" ]]; then
+    for (( i=0; i<$INBOX_LENGTH; i++ )); do
+      # get task description
+      TASK_DESCRIPTION=$( task _get  ${INBOX[$i]}.description )
+      echo "Task $(($i+1)): $TASK_DESCRIPTION"
+
+      if (( $i < $INBOX_LENGTH-1 )); then
+        read -n 1 -s -p "Press any key for the next task..." key
+        echo;
+      else
+        break
+      fi
+    done
+    exit 1
+  elif [[ $response == "n" || $response == "N" ]]; then
+    echo "Okay, bye for now."
+    exit 1
   else
-    break
+    echo "...I'm sorry, I didn't understand that. Could you just give me a 'y' or 'n'?"
+    echo;
+    ((ATTEMPTS++))
+    continue
   fi
 done
+echo "You're clearly having some trouble typing... Seeya later."
