@@ -21,6 +21,7 @@ while [[ $ATTEMPTS -lt 10 ]]; do
       TASK_DESCRIPTION=$( task _get  ${INBOX[$i]}.description )
       TASK_HEADING="Task $(($i+1)): \e[93m$TASK_DESCRIPTION\e[0m"
       # XXX: DEPENDENCY ---> boxes
+      # XXX: boxes has some weird indentation going on, on the right side...
       echo -e $TASK_HEADING | boxes -d stone
       echo
 
