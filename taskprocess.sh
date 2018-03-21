@@ -19,11 +19,15 @@ while [[ $ATTEMPTS -lt 10 ]]; do
     for (( i=0; i<$INBOX_LENGTH; i++ )); do
       # get task description
       TASK_DESCRIPTION=$( task _get  ${INBOX[$i]}.description )
-      echo "Task $(($i+1)): $TASK_DESCRIPTION"
+      TASK_HEADING="Task $(($i+1)): \e[93m$TASK_DESCRIPTION\e[0m"
+      # XXX: DEPENDENCY ---> boxes
+      echo -e $TASK_HEADING | boxes -d stone
+      echo
 
       if (( $i < $INBOX_LENGTH-1 )); then
         read -n 1 -s -p "Press any key for the next task..." key
-        echo;
+        echo
+        echo
       else
         break
       fi
@@ -34,7 +38,7 @@ while [[ $ATTEMPTS -lt 10 ]]; do
     exit 1
   else
     echo "...I'm sorry, I didn't understand that. Could you just give me a 'y' or 'n'?"
-    echo;
+    echo
     ((ATTEMPTS++))
     continue
   fi
