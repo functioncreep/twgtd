@@ -4,11 +4,13 @@
 
 # Function to draw boxes around lines of text:
 function boxdraw {
-  if [ -z $1 ]; then
+  if [[ -z $1 ]]; then
     echo "No text to draw box around!"
   else
     INNER_TEXT=$1
-    INNER_TEXT_LENGTH=${#INNER_TEXT}
+    # clean escape characters
+    INNER_TEXT_CLEANED=$(echo -e $INNER_TEXT)
+    INNER_TEXT_LENGTH=${#INNER_TEXT_CLEANED}
     TOP_BOTTOM_EDGE="+-"
 
     for (( i=0; i<=$INNER_TEXT_LENGTH; i++ )); do
@@ -17,7 +19,7 @@ function boxdraw {
 
     TOP_BOTTOM_EDGE+="+"
     echo $TOP_BOTTOM_EDGE
-    echo "| $INNER_TEXT |"
+    echo -e "| \e[93m$INNER_TEXT\e[0m |"
     echo $TOP_BOTTOM_EDGE
   fi
 }
@@ -36,16 +38,16 @@ while [[ $ATTEMPTS -lt 10 ]]; do
   echo;
 
   if [[ $response == "y" ]]; then
-    for (( i=0; i<$INBOX_LENGTH; i++ )); do
+    for (( x=0; x<$INBOX_LENGTH; x++ )); do
       # get task description
-      TASK_DESCRIPTION=$( task _get  ${INBOX[$i]}.description )
-      TASK_HEADING="Task $(($i+1)): \e[93m$TASK_DESCRIPTION\e[0m"
+      TASK_DESCRIPTION=$( task _get  ${INBOX[$x]}.description )
+      TASK_HEADING="Task $(($x+1)): $TASK_DESCRIPTION"
       # XXX: DEPENDENCY ---> boxes
       # XXX: boxes has some weird indentation going on, on the right side...
       boxdraw "$TASK_HEADING"
       echo
 
-      if (( $i < $INBOX_LENGTH-1 )); then
+      if (( $x < $INBOX_LENGTH-1 )); then
         read -n 1 -s -p "Press any key for the next task..." key
         echo
         echo
