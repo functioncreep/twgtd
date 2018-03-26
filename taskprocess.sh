@@ -2,6 +2,26 @@
 
 # GTD inbox processing in Taskwarrior
 
+# Function to draw boxes around lines of text:
+function boxdraw {
+  if [ -z $1 ]; then
+    echo "No text to draw box around!"
+  else
+    INNER_TEXT=$1
+    INNER_TEXT_LENGTH=${#INNER_TEXT}
+    TOP_BOTTOM_EDGE="+-"
+
+    for (( i=0; i<=$INNER_TEXT_LENGTH; i++ )); do
+      TOP_BOTTOM_EDGE+="-"
+    done
+
+    TOP_BOTTOM_EDGE+="+"
+    echo $TOP_BOTTOM_EDGE
+    echo "| $INNER_TEXT |"
+    echo $TOP_BOTTOM_EDGE
+  fi
+}
+
 # get task uuids from inbox
 INBOX_UUIDS=$( task uuids +in status.not:deleted status:pending )
 # split resulting string into array
@@ -22,7 +42,7 @@ while [[ $ATTEMPTS -lt 10 ]]; do
       TASK_HEADING="Task $(($i+1)): \e[93m$TASK_DESCRIPTION\e[0m"
       # XXX: DEPENDENCY ---> boxes
       # XXX: boxes has some weird indentation going on, on the right side...
-      echo -e $TASK_HEADING | boxes -d stone
+      boxdraw "$TASK_HEADING"
       echo
 
       if (( $i < $INBOX_LENGTH-1 )); then
