@@ -24,6 +24,7 @@ function boxdraw {
   fi
 }
 
+
 # get task uuids from inbox
 INBOX_UUIDS=$( task uuids +in status.not:deleted status:pending )
 # split resulting string into array
@@ -48,7 +49,10 @@ while [[ $ATTEMPTS -lt 10 ]]; do
       echo
 
       if (( $x < $INBOX_LENGTH-1 )); then
-        read -n 1 -s -p "Press any key for the next task..." key
+        echo "Enter Taskwarrior command for this task:"
+        read -p "task $( task _get ${INBOX[$x]}.id ) " comm
+        task ${INBOX[$x]} $comm
+        #read -n 1 -s -p "Press any key for the next task..." key
         echo
         echo
       else
