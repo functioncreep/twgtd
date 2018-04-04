@@ -4,23 +4,57 @@
 
 # Function to draw boxes around lines of text:
 function boxdraw {
-  if [[ -z $1 ]]; then
+  if [[ -z $2 ]]; then
     echo "No text to draw box around!"
+    exit 1
   else
-    INNER_TEXT=$1
+
+    INNER_TEXT=$2
     # clean escape characters
     INNER_TEXT_CLEANED=$(echo -e $INNER_TEXT)
     INNER_TEXT_LENGTH=${#INNER_TEXT_CLEANED}
-    TOP_BOTTOM_EDGE="+-"
 
-    for (( i=0; i<=$INNER_TEXT_LENGTH; i++ )); do
-      TOP_BOTTOM_EDGE+="-"
-    done
+    case $1 in
+      simple)
 
-    TOP_BOTTOM_EDGE+="+"
-    echo $TOP_BOTTOM_EDGE
-    echo -e "| \e[93m$INNER_TEXT\e[0m |"
-    echo $TOP_BOTTOM_EDGE
+        TOP_BOTTOM_EDGE="+-"
+
+        for (( i=0; i<=$INNER_TEXT_LENGTH; i++ )); do
+          TOP_BOTTOM_EDGE+="-"
+        done
+
+        TOP_BOTTOM_EDGE+="+"
+        echo $TOP_BOTTOM_EDGE
+        echo -e "| \e[93m$INNER_TEXT\e[0m |"
+        echo $TOP_BOTTOM_EDGE
+
+      ;;
+      bubble)
+
+        TOP_FIRST_ROW="  "
+        TOP_SECOND_ROW=" /"
+        BOTTOM_EDGE=""
+
+        for (( i=0; i<=$INNER_TEXT_LENGTH; i++ )); do
+          TOP_FIRST_ROW+="_"
+          TOP_SECOND_ROW+=" "
+        done
+
+        TOP_FIRST_ROW+="  "
+        TOP_SECOND_ROW+=" \\"
+
+        echo "${TOP_FIRST_ROW}"
+        echo "${TOP_SECOND_ROW}"
+        echo -e "| \e[93m$INNER_TEXT\e[0m |"
+        echo $TOP_FIRST_ROW
+
+      ;;
+      *)
+        echo "No box type specified!"
+        exit 1
+      ;;
+      esac
+
   fi
 }
 
@@ -51,7 +85,7 @@ while [[ $ATTEMPTS -lt 10 ]]; do
       task['description']=$( task _get  ${INBOX[$x]}.description )
       task['heading']="Task $(($x+1)): ${task['description']}"
 
-      boxdraw "${task['heading']}"
+      boxdraw simple "${task['heading']}"
       echo
 
       # Begin task processing flow --------
@@ -64,7 +98,7 @@ while [[ $ATTEMPTS -lt 10 ]]; do
 
           task['actionable']=true
 
-          boxdraw "${task['heading']}"
+          boxdraw bubble "${task['heading']}"
           echo
           read -p "Will it take more than 2 minutes? (Y/N): " response
           echo
