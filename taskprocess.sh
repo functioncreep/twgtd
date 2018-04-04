@@ -41,36 +41,112 @@ while [[ $ATTEMPTS -lt 10 ]]; do
   if [[ $response =~ [yY(yes|Yes|YES)] ]]; then
     for (( x=0; x<$INBOX_LENGTH; x++ )); do
       # get task description
-      TASK_DESCRIPTION=$( task _get  ${INBOX[$x]}.description )
-      TASK_HEADING="Task $(($x+1)): $TASK_DESCRIPTION"
+      # TASK_DESCRIPTION=$( task _get  ${INBOX[$x]}.description )
+      # TASK_HEADING="Task $(($x+1)): $TASK_DESCRIPTION"
 
-      boxdraw "$TASK_HEADING"
+      # create task action array and populate with task info
+      declare -A task
+      task['uuid']=${INBOX[$x]}
+      task['id']=$( task _get  ${INBOX[$x]}.id )
+      task['description']=$( task _get  ${INBOX[$x]}.description )
+      task['heading']="Task $(($x+1)): ${task['description']}"
+
+      boxdraw "${task['heading']}"
       echo
 
+      # Begin task processing flow --------
       if (( $x < $INBOX_LENGTH-1 )); then
-        read -p "Is this task actionable? (Y/N):" response
+        read -p "Is this task actionable? (Y/N): " response
+        echo
         
         case $response in
-        [yY(yes|Yes|YES)] *)
-        echo "You answered yes!"
-        echo
-        exit
+        [yY]*)
+
+          task['actionable']=true
+
+          boxdraw "${task['heading']}"
+          echo
+          read -p "Will it take more than 2 minutes? (Y/N): " response
+          echo
+
+          case $response in
+          [yY]*)
+
+            echo "Actionable task workflow goes here..."
+            echo
+            exit 1
+
+          ;;
+          [nN]*)
+
+            echo "Good! So go do it! I'll start the task for you and wait until it's done..."
+            echo
+            task ${task['id']} start
+            echo
+            read -p "(Type 'complete' to let me know when the task is finished, or 'stop' to stop the task and return to processing)----> " response
+            echo
+
+            case $response in
+            [complete]*)
+              
+              echo "Nice! I'll mark that task done."
+              echo
+              task ${task['id']} done
+              echo
+              echo "Next!"
+              echo
+
+            ;;
+            [stop]*)
+
+              echo "Ok, stopping that task..."
+              echo
+              task ${task['id']} stop
+              echo
+              exit 1
+
+            ;;
+            *)
+
+              echo "...Sorry? I didn't understand that."
+              echo
+              exit 1
+
+            ;;
+            esac
+
+          ;;
+          *)
+
+            echo "Wrong answah!"
+            exit 1
+
+          ;;
+          esac
+
         ;;
-        [nN(no|No|NO)] *)
-        echo "You answered no!"
-        echo
-        exit 1
+        [nN]*)
+
+          task['actionable']=false
+          echo "You answered no!"
+          echo
+          exit 1
+
         ;;
         *)
-        echo "...Uhh what?"
-        echo
-        exit 1
+
+          echo "...Uhh what?"
+          echo
+          exit 1
+
         ;;
         esac
 
       else
         break
       fi
+      # End task processing flow --------
+
     done
     exit 1
 
