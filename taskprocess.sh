@@ -38,29 +38,43 @@ while [[ $ATTEMPTS -lt 10 ]]; do
   read -p "Should I go ahead? (Y/N): " response
   echo;
 
-  if [[ $response == "y" ]]; then
+  if [[ $response =~ [yY(yes|Yes|YES)] ]]; then
     for (( x=0; x<$INBOX_LENGTH; x++ )); do
       # get task description
       TASK_DESCRIPTION=$( task _get  ${INBOX[$x]}.description )
       TASK_HEADING="Task $(($x+1)): $TASK_DESCRIPTION"
-      # XXX: DEPENDENCY ---> boxes
-      # XXX: boxes has some weird indentation going on, on the right side...
+
       boxdraw "$TASK_HEADING"
       echo
 
       if (( $x < $INBOX_LENGTH-1 )); then
-        echo "Enter Taskwarrior command for this task:"
-        read -p "task $( task _get ${INBOX[$x]}.id ) " comm
-        task ${INBOX[$x]} $comm
-        #read -n 1 -s -p "Press any key for the next task..." key
+        read -p "Is this task actionable? (Y/N):" response
+        
+        case $response in
+        [yY(yes|Yes|YES)] *)
+        echo "You answered yes!"
         echo
+        exit
+        ;;
+        [nN(no|No|NO)] *)
+        echo "You answered no!"
         echo
+        exit 1
+        ;;
+        *)
+        echo "...Uhh what?"
+        echo
+        exit 1
+        ;;
+        esac
+
       else
         break
       fi
     done
     exit 1
-  elif [[ $response == "n" || $response == "N" ]]; then
+
+  elif [[ $response =~ [nN(no|No|NO)] ]]; then
     echo "Okay, bye for now."
     exit 1
   else
